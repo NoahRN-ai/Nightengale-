@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nightingale AI Nurse Assistant</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; background-color: #f0f4f8; color: #333; }
+        h1 { color: #2c3e50; text-align: center; }
+        textarea { width: 100%; box-sizing: border-box; height: 150px; margin-bottom: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1em; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; display: block; margin: 0 auto; }
+        button:hover { background-color: #0056b3; }
+        #output { border: 1px solid #ddd; padding: 15px; margin-top: 20px; background-color: #fff; border-radius: 8px; white-space: pre-wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #output h3 { margin-top: 0; color: #007bff; }
+        p { line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <h1>Nightingale AI Nurse Assistant</h1>
+    <p>Enter raw nurse notes below. For example: "John Doe 52 DNR patient of the medical group (cc2/hospitalists) presents with sob, cta showed pe, on heparin gtt, still on non rebreather"</p>
+    <textarea id="nurseNotesInput" placeholder="e.g., Jane Smith 45 y.o. admitted with chest pain, ECG shows ST elevation, troponin elevated. Given aspirin and nitroglycerin. Awaiting cath lab."></textarea>
+    <button onclick="getAssessmentSummary()">Generate Assessment</button>
+    <div id="output">
+        <h3>Generated Assessment:</h3>
+        <p>Your structured assessment will appear here.</p>
+    </div>
+
+    <script>
+        async function getAssessmentSummary() {
+            const nurseNotes = document.getElementById('nurseNotesInput').value;
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '<h3>Generated Assessment:</h3><p>Generating...</p>';
+
+            // IMPORTANT: Replace this with your actual Cloud Function endpoint URL after deployment
+            const cloudFunctionUrl = 'YOUR_CLOUD_FUNCTION_ENDPOINT_HERE';
+
+            if (cloudFunctionUrl === 'YOUR_CLOUD_FUNCTION_ENDPOINT_HERE') {
+                outputDiv.innerHTML = '<h3>Configuration Error:</h3><p>The Cloud Function URL has not been set in index.html. Please deploy the function and update the script.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(cloudFunctionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ nurse_notes: nurseNotes }),
+                });
+
+                if (response.ok) {
+                    const data = await response.text(); // Assuming text response directly
+                    outputDiv.innerHTML = `<h3>Generated Assessment:</h3><pre>${data}</pre>`;
+                } else {
+                    const errorText = await response.text();
+                    outputDiv.innerHTML = `<h3>Error:</h3><p>Failed to get assessment: ${response.status} ${errorText}</p>`;
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `<h3>Error:</h3><p>Network or API error: ${error}. Make sure the Cloud Function URL is correct and accessible.</p>`;
+                console.error('Fetch error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
